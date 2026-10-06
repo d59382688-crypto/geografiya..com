@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geografiya Savollar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #050505;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(17, 17, 17, 0.9);
+            border: 2px solid #0ff;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #0ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .quiz-container {
+            background: rgba(17, 17, 17, 0.95);
+            border: 2px solid #f0f;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .question-card {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-number {
+            color: #f0f;
+            font-weight: bold;
+            font-size: 1em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #fff;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            color: #ddd;
+        }
+
+        .option:hover {
+            background: #222;
+            border-color: #0ff;
+            color: #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            transform: translateX(5px);
+        }
+
+        .option.correct {
+            background: #003300;
+            color: #0f0;
+            border-color: #0f0;
+            box-shadow: 0 0 15px #0f0;
+        }
+
+        .option.wrong {
+            background: #330000;
+            color: #f00;
+            border-color: #f00;
+            box-shadow: 0 0 15px #f00;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #333;
+        }
+
+        /* TUGMALAR UCHUN YANGI STIL */
+        .btn {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #0ff, #0088ff); /* Yorqin gradient fon */
+            color: #000; /* Qora yozuv (kontrast uchun) */
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6); /* Neon soya */
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.9);
+            background: linear-gradient(45deg, #fff, #0ff);
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            color: #f0f;
+            font-weight: bold;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #222;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0ff, #f0f);
+            transition: width 0.3s;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        .result-card {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-card.active {
+            display: block;
+        }
+
+        .result-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 2em;
+            color: #0ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .result-score {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .start-screen.active {
+            display: block;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #ccc;
+            font-size: 1.1em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            margin-top: 30px;
+            text-shadow: 0 0 5px #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌍 Geografiya Savollar</h1>
+            <p class="subtitle">Bilimingizni sinab ko'ring!</p>
+        </header>
+
+        <div class="quiz-container">
+            <div class="start-screen active" id="startScreen">
+                <h2 style="color: #f0f; margin-bottom: 20px; text-shadow: 0 0 10px #f0f;">Geografiya Fanidan Test</h2>
+                <ul class="feature-list">
+                    <li>8 ta maxsus savol</li>
+                    <li>O'zbekiston iqlimi va resurslari</li>
+                    <li>Materiklar va okeanlar</li>
+                    <li>Avtomatik tekshirish</li>
+                </ul>
+                <!-- Boshlash tugmasi -->
+                <button class="btn" onclick="startQuiz()">Boshlash 🚀</button>
+            </div>
+
+            <div id="quizContent" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+
+                <div id="questionsContainer"></div>
+
+                <div class="controls">
+                    <span class="score-display" id="scoreDisplay">Ball: 0/8</span>
+                </div>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <div class="result-icon">🎉</div>
+                <h2 class="result-title">Yakunlandi!</h2>
+                <p class="result-score" id="finalScore"></p>
+                <!-- Qayta boshlash tugmasi -->
+                <button class="btn" onclick="restartQuiz()">Qayta Boshlash 🔄</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 Geografiya Savollar</p>
+        </footer>
+    </div>
+
+    <script>
+        var questions = [
+            {
+                question: "Tabiiy geografik o'rin nimalardan iborat?",
+                options: [
+                    "Faqat reliefsan",
+                    "Kenglik, uzunlik, relyef, iqlim, suv va biologik resurslar",
+                    "Faqat iqlim va suvdan",
+                    "Faqat hayvonot dunyosidan"
+                ],
+                correct: 1
+            },
+            {
+                question: "Tinch okeani qaysi materiklar chegarasida joylashgan?",
+                options: [
+                    "Osiyo, Avstraliya, Shimoliy va Janubiy Amerika",
+                    "Yevropa va Afrika",
+                    "Faqat Afrika va Antarktida",
+                    "Shimoliy Amerika va Yevropa"
+                ],
+                correct: 0
+            },
+            {
+                question: "O'zbekiston hududi nechta iqlim mintaqasiga bo'linadi?",
+                options: [
+                    "2 ta",
+                    "4 ta",
+                    "3 ta (Shimoliy, Markaziy, Janubiy)",
+                    "5 ta"
+                ],
+                correct: 2
+            },
+            {
+                question: "Yer yuzida jami nechta materik bor?",
+                options: [
+                    "4 ta",
+                    "5 ta",
+                    "7 ta",
+                    "6 ta"
+                ],
+                correct: 3
+            },
+            {
+                question: "Ekvatordan qaysi uchta materik o'tadi?",
+                options: [
+                    "Yevropa, Osiyo, Antarktida",
+                    "Afrika, Janubiy Amerika, Osiyo (orollari)",
+                    "Avstraliya, Antarktida, Shimoliy Amerika",
+                    "Faqat Afrika va Janubiy Amerika"
+                ],
+                correct: 1
+            },
+            {
+                question: "Maydoni jihatidan eng katta materik qaysi?",
+                options: [
+                    "Afrika (30,3 mln km²)",
+                    "Shimoliy Amerika (24,7 mln km²)",
+                    "Antarktida (14,0 mln km²)",
+                    "Osiyo (44,6 mln km²)"
+                ],
+                correct: 3
+            },
+            {
+                question: "O'zbekistonning asosiy tabiiy resurslari qaysilar?",
+                options: [
+                    "Neft, gaz, ko'mir, rangli metallar va yer resurslari",
+                    "Faqat o'rmonlar",
+                    "Faqat suv resurslari",
+                    "Faqat qishloq xo'jaligi yerlari"
+                ],
+                correct: 0
+            },
+            {
+                question: "Materiklar ichida maydoni eng kichigi qaysi?",
+                options: [
+                    "Yevropa",
+                    "Janubiy Amerika",
+                    "Avstraliya (7,7 mln km²)",
+                    "Antarktida"
+                ],
+                correct: 2
+            }
+        ];
+
+        var currentQuestion = 0;
+        var score = 0;
+        var answered = new Array(questions.length).fill(false);
+        var userAnswers = new Array(questions.length).fill(-1);
+
+        function startQuiz() {
+            document.getElementById("startScreen").classList.remove("active");
+            document.getElementById("startScreen").classList.add("hidden");
+            document.getElementById("quizContent").style.display = "block";
+            renderQuestions();
+            showQuestion(0);
+        }
+
+        function renderQuestions() {
+            var container = document.getElementById("questionsContainer");
+            container.innerHTML = "";
+            
+            for (var i = 0; i < questions.length; i++) {
+                var q = questions[i];
+                var card = document.createElement("div");
+                card.className = "question-card";
+                card.id = "question-" + i;
+                
+                var optionsHTML = "";
+                for (var j = 0; j < q.options.length; j++) {
+                    optionsHTML += '<div class="option" onclick="selectOption(' + i + ', ' + j + ')">' + q.options[j] + '</div>';
+                }
+                
+                card.innerHTML = 
+                    '<div class="question-number">Savol ' + (i + 1) + ' / ' + questions.length + '</div>' +
+                    '<div class="question-text">' + q.question + '</div>' +
+                    '<div class="options">' + optionsHTML + '</div>';
+                
+                container.appendChild(card);
+            }
+        }
+
+        function showQuestion(index) {
+            var cards = document.querySelectorAll(".question-card");
+            for (var i = 0; i < cards.length; i++) {
+                cards[i].classList.remove("active");
+            }
+            document.getElementById("question-" + index).classList.add("active");
+            updateProgressBar();
+        }
+
+        function selectOption(qIndex, optIndex) {
+            if (answered[qIndex]) return;
+            
+            answered[qIndex] = true;
+            userAnswers[qIndex] = optIndex;
+            
+            var options = document.querySelectorAll("#question-" + qIndex + " .option");
+            for (var i = 0; i < options.length; i++) {
+                options[i].classList.add("disabled");
+            }
+            
+            if (optIndex === questions[qIndex].correct) {
+                options[optIndex].classList.add("correct");
+                score++;
+            } else {
+                options[optIndex].classList.add("wrong");
+                options[questions[qIndex].correct].classList.add("correct");
+            }
+            
+            updateScore();
+
+            setTimeout(function() {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    showQuestion(currentQuestion);
+                } else {
+                    showResults();
+                }
+            }, 1500); 
+        }
+
+        function updateProgressBar() {
+            var progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById("progressBar").style.width = progress + "%";
+        }
+
+        function updateScore() {
+            document.getElementById("scoreDisplay").textContent = "Ball: " + score + "/" + questions.length;
+        }
+
+        function showResults() {
+            document.getElementById("quizContent").style.display = "none";
+            document.getElementById("resultCard").classList.add("active");
+            
+            var percentage = Math.round((score / questions.length) * 100);
+            var message = "";
+            
+            if (percentage >= 90) message = "A'lo! 🌟";
+            else if (percentage >= 70) message = "Yaxshi natija! 👍";
+            else if (percentage >= 50) message = "O'rtacha 📚";
+            else message = "Ko'proq o'rganing 💪";
+            
+            document.getElementById("finalScore").innerHTML = 
+                "Siz " + score + " ta savolga to'g'ri javob berdingiz<br>" +
+                "<strong>" + percentage + "%</strong> - " + message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = new Array(questions.length).fill(false);
+            userAnswers = new Array(questions.length).fill(-1);
+            
+            document.getElementById("resultCard").classList.remove("active");
+            document.getElementById("startScreen").classList.remove("hidden");
+            document.getElementById("startScreen").classList.add("active");
+            document.getElementById("scoreDisplay").textContent = "Ball: 0/" + questions.length;
+        }
+    </script>
+</body>
+</html>
